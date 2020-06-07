@@ -13,8 +13,8 @@ namespace PathFinding
         [STAThread]
         static void Main()
         {
-            using (var game = new Game1())
-                game.Run();
+            using (var app = new MainLoop())
+                app.Run();
         }
     }
 }

@@ -1,28 +1,24 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using PathFinding.src;
+//using 
 
 namespace PathFinding
 {
     /// <summary>
     /// This is the main type for your game.
     /// </summary>
-    public class Game1 : Game
+    public class MainLoop : Game
     {
-        // Enum
-        enum Tile
-        {
-            Open,
-            Blocked,
-            Start,
-            Goal
-        }
-
         // Consts
         const int WINDOW_WIDTH = 800;
         const int WINDOW_HEIGHT = 480;
         const int TILE_LENGTH = 40;
+        static Color GRID_COLOR = Color.Gray;
 
         // Properties
         static int TileRows => WINDOW_HEIGHT / TILE_LENGTH;
@@ -36,9 +32,10 @@ namespace PathFinding
         Texture2D t; //base for the line texture
 
         // Other vars
-        Tile[,] grid = new Tile[TileRows, TileCols];
+        Tile[,] Tiles;
+        Search Search;
 
-        public Game1()
+        public MainLoop()
         {
             graphics = new GraphicsDeviceManager(this)
             {
@@ -62,17 +59,45 @@ namespace PathFinding
             // Monogame init
             IsMouseVisible = true;
 
-            // User defined init
-            // Init grid
+            // Init tiles
+            Tiles = new Tile[TileRows, TileCols];
             for (int r = 0; r < TileRows; r++)
             {
                 for (int c = 0; c < TileCols; c++)
                 {
-                    grid[r, c] = Tile.Open;
+                    Tiles[r, c] = new Tile(TileType.Open);
                 }
             }
 
-            grid[1, 3] = Tile.Blocked;
+            for (int r = 0; r < TileRows; r++)
+            {
+                for (int c = 0; c < TileCols; c++)
+                {
+                    Tile tile = Tiles[r, c];
+
+                    // Up
+                    if (r > 0)
+                        tile.Neighbours.Add(Tiles[r - 1, c]);
+
+                    // Down
+                    if (r < TileRows - 1)
+                        tile.Neighbours.Add(Tiles[r + 1, c]);
+
+                    // Left
+                    if (c > 0)
+                        tile.Neighbours.Add(Tiles[r, c - 1]);
+
+                    // Right
+                    if (c < TileCols - 1)
+                        tile.Neighbours.Add(Tiles[r, c + 1]);
+                }
+            }
+
+            Tiles[5, 3].Type = TileType.Start;
+            Tiles[5, 16].Type = TileType.Goal;
+
+            Search = new Search(Tiles[5, 3], Tiles[5, 16]);
+
 
             base.Initialize();
         }
@@ -110,10 +135,19 @@ namespace PathFinding
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            // TODO: Add your update logic here
+            if (!Search.Searching)
+            {
+                if (Keyboard.GetState().IsKeyDown(Keys.Enter))
+                    Search.StartSearch(SearchType.Bfs);
+            }
+            else
+            {
+                Search.Update();
+            }
 
             base.Update(gameTime);
         }
+
 
         /// <summary>
         /// This is called when the game should draw itself.
@@ -133,50 +167,41 @@ namespace PathFinding
             base.Draw(gameTime);
         }
 
+        #region Drawing
         // Non-monogame related functions
         private void DrawGridLines(SpriteBatch spriteBatch)
         {
-            Console.WriteLine($"TileRows: { TileRows }");
-            Console.WriteLine($"TileCols: { TileCols }");
-
             // Draw horizontal gridlines
             for (int r = 0; r <= TileRows; r++)
             {
                 int y = r * TILE_LENGTH;
-                DrawLine(spriteBatch, new Vector2(0, y), new Vector2(WINDOW_WIDTH, y));
+                DrawLine(spriteBatch, new Vector2(0, y), new Vector2(WINDOW_WIDTH, y), GRID_COLOR);
             }
 
             // Draw vertical gridlines
             for (int c = 0; c <= TileCols; c++)
             {
                 int x = c * TILE_LENGTH;
-                DrawLine(spriteBatch, new Vector2(x, 0), new Vector2(x, WINDOW_HEIGHT));
+                DrawLine(spriteBatch, new Vector2(x, 0), new Vector2(x, WINDOW_HEIGHT), GRID_COLOR);
             }
         }
 
         private void DrawTiles(SpriteBatch spriteBatch)
         {
-            // Draw horizontal gridlines
             for (int r = 0; r < TileRows; r++)
             {
                 for (int c = 0; c < TileCols; c++)
                 {
                     int x = c * TILE_LENGTH;
                     int y = r * TILE_LENGTH;
-                    Color color = Color.White;
-                    if (grid[r, c] == Tile.Open)
-                        color = Color.White;
-                    else if (grid[r, c] == Tile.Blocked)
-                        color = Color.Gray;
+                    Tile tile = Tiles[r, c];
 
-                    spriteBatch.Draw(t, new Rectangle(x, y, TILE_LENGTH, TILE_LENGTH), null, color);
+                    spriteBatch.Draw(t, new Rectangle(x, y, TILE_LENGTH, TILE_LENGTH), null, tile.GetColor(Search));
                 }
             }
-
         }
 
-
-        private void DrawLine(SpriteBatch spriteBatch, Vector2 start, Vector2 end)
+        private void DrawLine(SpriteBatch spriteBatch, Vector2 start, Vector2 end, Color color, int width = 1)
         {
             Vector2 edge = end - start;
 
@@ -184,17 +209,19 @@ namespace PathFinding
             float angle = (float)Math.Atan2(edge.Y, edge.X);
 
             spriteBatch.Draw(t,
-                new Rectangle(// rectangle defines shape of line and position of start of line
+                new Rectangle(
                     (int)start.X,
                     (int)start.Y,
-                    (int)edge.Length(), //sb will strech the texture to fill this rectangle
-                    1), //width of line, change this to make thicker line
+                    (int)edge.Length(), // Stretch texture to fill rectangle
+                    width),
                 null,
-                Color.Black, //colour of line
-                angle,     //angle of line (calulated above)
-                new Vector2(0, 0), // point in line about which to rotate
+                color,
+                angle,
+                new Vector2(0, 0), // Origin of rotation
                 SpriteEffects.None,
                 0);
         }
     }
+
+    #endregion
 }

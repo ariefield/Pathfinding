@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,11 +17,39 @@ namespace PathFinding.src
 
     public class Tile
     {
-        public TileType type;
+        static Color OPEN_COLOR = Color.Black;
+        static Color BLOCKED_COLOR = Color.Gray;
+        static Color START_COLOR = Color.White;
+        static Color GOAL_COLOR = Color.Green;
 
-        public Tile()
+        public TileType Type { get; set; }
+        public List<Tile> Neighbours { get; set; }
+
+        public Tile(TileType type)
         {
+            Type = type;
 
+            Neighbours = new List<Tile>();
+        }
+
+        public Color GetColor(Search search)
+        {
+            Color color = OPEN_COLOR;
+            if (Type == TileType.Open)
+            {
+                if (search.Seen.ContainsKey(this))
+                    color = Color.IndianRed;
+                else
+                    color = OPEN_COLOR;
+            }
+            else if (Type == TileType.Blocked)
+                color = BLOCKED_COLOR;
+            else if (Type == TileType.Start)
+                color = START_COLOR;
+            else if (Type == TileType.Goal)
+                color = GOAL_COLOR;
+
+            return color;
         }
 
     }
