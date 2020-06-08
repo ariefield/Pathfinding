@@ -18,6 +18,7 @@ namespace PathFinding.src
         public Tile Start { get; set; }
         public Tile Current { get; set; }
         public Tile Goal { get; set; }
+        public int Steps { get; set; }
 
         private Queue<Tile> _queue;
 
@@ -29,18 +30,20 @@ namespace PathFinding.src
 
             Searching = false;
             Seen = new Dictionary<Tile, bool>();
+            Steps = 0;
 
             _queue = new Queue<Tile>();
         }
 
         public void Update()
         {
+            Steps += 1;
             Current = _queue.Dequeue();
 
             if (Current == Goal)
             {
                 Searching = false;
-                Console.WriteLine("Found goal");
+                Console.WriteLine($"Found goal in {Steps} steps");
                 return;
             }
 
@@ -61,12 +64,16 @@ namespace PathFinding.src
 
         public void StartSearch(SearchType type)
         {
+            Searching = true;
+            Steps = 0;
+            Seen = new Dictionary<Tile, bool>();
+            _queue = new Queue<Tile>();
+
             if (type == SearchType.Bfs)
             {
                 _queue.Enqueue(Start);
             }
 
-            Searching = true;
         }
     }
 }

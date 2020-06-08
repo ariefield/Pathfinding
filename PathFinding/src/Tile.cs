@@ -37,7 +37,9 @@ namespace PathFinding.src
             Color color = OPEN_COLOR;
             if (Type == TileType.Open)
             {
-                if (search.Seen.ContainsKey(this))
+                if (search.Current == this)
+                    color = Color.Red;
+                else if (search.Seen.ContainsKey(this))
                     color = Color.IndianRed;
                 else
                     color = OPEN_COLOR;

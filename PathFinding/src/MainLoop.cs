@@ -137,12 +137,13 @@ namespace PathFinding
 
             if (!Search.Searching)
             {
-                if (Keyboard.GetState().IsKeyDown(Keys.Enter))
+                if (Keyboard.GetState().IsKeyDown(Keys.Space))
                     Search.StartSearch(SearchType.Bfs);
             }
             else
             {
-                Search.Update();
+                if (Keyboard.GetState().IsKeyDown(Keys.Space) && Keyboard.GetState.)
+                    Search.Update();
             }
 
             base.Update(gameTime);
