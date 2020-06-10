@@ -47,7 +47,13 @@ namespace PathFinding.src
             else if (Type == TileType.Blocked)
                 color = BLOCKED_COLOR;
             else if (Type == TileType.Start)
-                color = START_COLOR;
+            {
+                if (search.Current == this)
+                    color = Color.IndianRed;
+                else
+                    color = START_COLOR;
+            }
+
             else if (Type == TileType.Goal)
                 color = GOAL_COLOR;
 

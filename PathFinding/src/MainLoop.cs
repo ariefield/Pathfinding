@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -19,8 +20,6 @@ namespace PathFinding
         const int WINDOW_HEIGHT = 480;
         const int TILE_LENGTH = 40;
         static Color GRID_COLOR = Color.Gray;
-
-        // Properties
         static int TileRows => WINDOW_HEIGHT / TILE_LENGTH;
         static int TileCols => WINDOW_WIDTH / TILE_LENGTH;
 
@@ -34,6 +33,7 @@ namespace PathFinding
         // Other vars
         Tile[,] Tiles;
         Search Search;
+        Dictionary<Keys, bool> Pressed;
 
         public MainLoop()
         {
@@ -98,6 +98,10 @@ namespace PathFinding
 
             Search = new Search(Tiles[5, 3], Tiles[5, 16]);
 
+            Pressed = new Dictionary<Keys, bool> {
+                { Keys.Space, false},
+                { Keys.Right, false}
+            };
 
             base.Initialize();
         }
@@ -138,17 +142,58 @@ namespace PathFinding
             if (!Search.Searching)
             {
                 if (Keyboard.GetState().IsKeyDown(Keys.Space))
+                {
                     Search.StartSearch(SearchType.Bfs);
+                    Search.AutoAdvance = true;
+                }
+
+                if (Keyboard.GetState().IsKeyDown(Keys.Right))
+                {
+                    Search.StartSearch(SearchType.Bfs);
+                    Search.Update();
+                }
+
             }
             else
             {
-                if (Keyboard.GetState().IsKeyDown(Keys.Space) && Keyboard.GetState.)
+                if (Search.AutoAdvance)
+                {
+                    if (UserPressed(Keys.Space))
+                        Search.AutoAdvance = false;
+                    else
+                        Search.Update();
+                }
+
+                else if (UserPressed(Keys.Space))
+                    Search.AutoAdvance = true;
+
+                else if (UserPressed(Keys.Right))
                     Search.Update();
             }
+
+            foreach (Keys key in Pressed.Keys.ToList())
+            {
+                Pressed[key] = Keyboard.GetState().IsKeyDown(key);
+            }
+
 
             base.Update(gameTime);
         }
 
+
+        #region UserInput
+
+        private bool UserPressed(Keys key)
+        {
+            if (Keyboard.GetState().IsKeyDown(key) && !Pressed[key])
+                return true;
+            else
+                return false;
+        }
+
+        #endregion
+
+        #region Drawing
 
         /// <summary>
         /// This is called when the game should draw itself.
@@ -168,8 +213,6 @@ namespace PathFinding
             base.Draw(gameTime);
         }
 
-        #region Drawing
-        // Non-monogame related functions
         private void DrawGridLines(SpriteBatch spriteBatch)
         {
             // Draw horizontal gridlines

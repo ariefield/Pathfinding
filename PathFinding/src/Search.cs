@@ -14,6 +14,7 @@ namespace PathFinding.src
     public class Search
     {
         public bool Searching { get; set; }
+        public bool AutoAdvance { get; set; }
         public Dictionary<Tile, bool> Seen { get; set; }
         public Tile Start { get; set; }
         public Tile Current { get; set; }
@@ -29,6 +30,7 @@ namespace PathFinding.src
             Goal = goal;
 
             Searching = false;
+            AutoAdvance = false;
             Seen = new Dictionary<Tile, bool>();
             Steps = 0;
 
@@ -37,20 +39,21 @@ namespace PathFinding.src
 
         public void Update()
         {
-            Steps += 1;
-            Current = _queue.Dequeue();
+            do
+            {
+                Current = _queue.Dequeue();
+                Steps += 1;
+            } while (Seen.ContainsKey(Current));
+
 
             if (Current == Goal)
             {
                 Searching = false;
+                AutoAdvance = false;
                 Console.WriteLine($"Found goal in {Steps} steps");
                 return;
             }
 
-            if (Seen.ContainsKey(Current))
-            {
-                return;
-            }
 
             Seen[Current] = true;
 
