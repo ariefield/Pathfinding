@@ -15,7 +15,7 @@ namespace PathFinding.src
     {
         public bool Searching { get; set; }
         public bool AutoAdvance { get; set; }
-        public Dictionary<Tile, bool> Seen { get; set; }
+        public Dictionary<Tile, bool> Visited { get; set; }
         public Dictionary<Tile, Tile> CameFrom { get; set; }
         public Tile Start { get; set; }
         public Tile Current { get; set; }
@@ -33,7 +33,7 @@ namespace PathFinding.src
 
             Searching = false;
             AutoAdvance = false;
-            Seen = new Dictionary<Tile, bool>();
+            Visited = new Dictionary<Tile, bool>();
             CameFrom = new Dictionary<Tile, Tile>();
             Path = new List<Tile>();
             Steps = 0;
@@ -45,20 +45,31 @@ namespace PathFinding.src
         {
             Steps += 1;
             Current = _queue.Dequeue();
-            Seen[Current] = true;
+            Visited[Current] = true;
 
             if (Current == Goal)
             {
+                Console.WriteLine($"Found goal in {Steps} steps");
                 Searching = false;
                 AutoAdvance = false;
-                Console.WriteLine($"Found goal in {Steps} steps");
+
+                while (Current != Start)
+                {
+                    Path.Add(Current);
+                    Current = CameFrom[Current];
+                }
+                Current = null;  // To show start
+
                 return;
             }
 
             foreach (Tile tile in Current.Neighbours)
             {
-                if (!Seen.ContainsKey(tile) && !_queue.Contains(tile))
+                if (!Visited.ContainsKey(tile) && !_queue.Contains(tile))
+                {
                     _queue.Enqueue(tile);
+                    CameFrom[tile] = Current;
+                }
             }
 
             if (_queue.Count == 0)
@@ -70,8 +81,9 @@ namespace PathFinding.src
         {
             Searching = true;
             Steps = 0;
-            Seen = new Dictionary<Tile, bool>();
+            Visited = new Dictionary<Tile, bool>();
             CameFrom = new Dictionary<Tile, Tile>();
+            Path = new List<Tile>();
             _queue = new Queue<Tile>();
 
             if (type == SearchType.Bfs)

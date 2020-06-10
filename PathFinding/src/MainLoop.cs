@@ -141,13 +141,13 @@ namespace PathFinding
 
             if (!Search.Searching)
             {
-                if (Keyboard.GetState().IsKeyDown(Keys.Space))
+                if (UserPressed(Keys.Space))
                 {
                     Search.StartSearch(SearchType.Bfs);
                     Search.AutoAdvance = true;
                 }
 
-                if (Keyboard.GetState().IsKeyDown(Keys.Right))
+                if (UserPressed(Keys.Right))
                 {
                     Search.StartSearch(SearchType.Bfs);
                     Search.Update();

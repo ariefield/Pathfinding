@@ -21,6 +21,7 @@ namespace PathFinding.src
         static Color BLOCKED_COLOR = Color.Gray;
         static Color START_COLOR = Color.White;
         static Color GOAL_COLOR = Color.Green;
+        static Color PATH_COLOR = Color.Yellow;
 
         public TileType Type { get; set; }
         public List<Tile> Neighbours { get; set; }
@@ -37,9 +38,11 @@ namespace PathFinding.src
             Color color = OPEN_COLOR;
             if (Type == TileType.Open)
             {
-                if (search.Current == this)
+                if (search.Path.Contains(this))
+                    color = PATH_COLOR;
+                else if (search.Current == this)
                     color = Color.Red;
-                else if (search.Seen.ContainsKey(this))
+                else if (search.Visited.ContainsKey(this))
                     color = Color.IndianRed;
                 else
                     color = OPEN_COLOR;
@@ -49,7 +52,7 @@ namespace PathFinding.src
             else if (Type == TileType.Start)
             {
                 if (search.Current == this)
-                    color = Color.IndianRed;
+                    color = Color.Red;
                 else
                     color = START_COLOR;
             }
