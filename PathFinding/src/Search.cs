@@ -65,7 +65,7 @@ namespace PathFinding.src
 
             foreach (Tile tile in Current.Neighbours)
             {
-                if (!Visited.ContainsKey(tile) && !_queue.Contains(tile))
+                if (!Visited.ContainsKey(tile) && !_queue.Contains(tile) && tile.Type != TileType.Blocked)
                 {
                     _queue.Enqueue(tile);
                     CameFrom[tile] = Current;

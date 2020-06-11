@@ -34,6 +34,7 @@ namespace PathFinding
         Tile[,] Tiles;
         Search Search;
         Dictionary<Keys, bool> Pressed;
+        bool Clicked;
 
         public MainLoop()
         {
@@ -103,6 +104,8 @@ namespace PathFinding
                 { Keys.Right, false}
             };
 
+            Clicked = false;
+
             base.Initialize();
         }
 
@@ -136,7 +139,8 @@ namespace PathFinding
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+            // Keyboard input
+            if (Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
             if (!Search.Searching)
@@ -176,16 +180,49 @@ namespace PathFinding
                 Pressed[key] = Keyboard.GetState().IsKeyDown(key);
             }
 
+            // Mouse input
+            MouseState mouseState = Mouse.GetState();
+            Point mousePosition = new Point(mouseState.X, mouseState.Y);
+
+            if (UserClicked(mouseState))
+            {
+                Tile tile = getTile(mousePosition);
+                if (tile.Type is TileType.Open)
+                    tile.Type = TileType.Blocked;
+                else if (tile.Type is TileType.Blocked)
+                    tile.Type = TileType.Open;
+            }
+
+            Clicked = (mouseState.LeftButton == ButtonState.Pressed);
 
             base.Update(gameTime);
         }
 
+        #region Tile Logic
 
-        #region UserInput
+        private Tile getTile(Point mousePosition)
+        {
+            int row = mousePosition.Y / TILE_LENGTH;
+            int col = mousePosition.X / TILE_LENGTH;
+
+            return Tiles[row, col];
+        }
+
+        #endregion
+
+        #region User Input
 
         private bool UserPressed(Keys key)
         {
             if (Keyboard.GetState().IsKeyDown(key) && !Pressed[key])
+                return true;
+            else
+                return false;
+        }
+
+        private bool UserClicked(MouseState state)
+        {
+            if (state.LeftButton == ButtonState.Pressed && !Clicked)
                 return true;
             else
                 return false;
