@@ -9,3 +9,4 @@ TODO:
 - [ ] Moving start/end (Different tools)
 - [ ] Other algorithms
 - [ ] Refactor into high level functions
+- [ ] README and .exe
