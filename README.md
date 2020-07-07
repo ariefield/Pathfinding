@@ -4,8 +4,8 @@ TODO:
 - [X] Play vs. frame-by-frame
 - [X] Display path once found
 - [X] Adding/removing terrain
-	- [] Disable edit while searching
-	- [] Rset board when editing starts
-- [] Moving start/end (Different tools)
-- [] Other algorithms
-- [] Refactor into high level functions
+	- [ ] Disable edit while searching
+	- [ ] Reset board when editing starts
+- [ ] Moving start/end (Different tools)
+- [ ] Other algorithms
+- [ ] Refactor into high level functions
